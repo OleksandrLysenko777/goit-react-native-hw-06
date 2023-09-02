@@ -12,6 +12,11 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
+
+import { signInWithEmailAndPassword } from "firebase/auth";
+import {auth}  from "../../../firebaseConfig"; 
+
+
 import {
   container,
   bgContainer,
@@ -47,15 +52,23 @@ const LoginScreen = () => {
     setCurrentFocused("");
     Keyboard.dismiss();
   };
-  const onSubmitUserRegister = () => {
-    if (!email.trim() || !password.trim())
+ const onSubmitUserLogin = async () => {
+    if (!email.trim() || !password.trim()) {
       return console.warn("Будь-ласка, заповніть поля");
-    console.log({ email, password });
+    }
 
-    handleKeyboardHide();
-    navigation.navigate("Home", { user: { email, password } });
-    clearUserForm();
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log("Авторизація успішна!");
+
+      handleKeyboardHide();
+      navigation.navigate("Home", { user: { email, password } });
+      clearUserForm();
+    } catch (error) {
+      console.error("Помилка авторизації:", error);
+    }
   };
+
   const handleFocus = (currentFocusInput = "") => {
     setIsShowKeyboard(true);
     setCurrentFocused(currentFocusInput);
@@ -129,7 +142,7 @@ const LoginScreen = () => {
 
             {!isShowKeyboard && (
               <View>
-                <TouchableOpacity style={btn} onPress={onSubmitUserRegister}>
+                <TouchableOpacity style={btn} onPress={onSubmitUserLogin}>
                   <Text style={btnText}>Увійти</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={link}

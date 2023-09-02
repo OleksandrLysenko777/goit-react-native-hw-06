@@ -12,7 +12,8 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
-
+import {auth} from "../../../firebaseConfig";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import {
   container,
   bgContainer,
@@ -40,10 +41,10 @@ import {
 } from "./RegistrationScreen.styled";
 import backgroundImg from "../../../assets/img/background.jpg";
 import CirclePlus from "../../../assets/svg/CirclePlus";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
 
 const RegistrationScreen = () => {
-   const navigation = useNavigation();
+  const navigation = useNavigation();
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [isAvatar, setAvatar] = useState(null);
   const [isShowPassword, setIsShowPassword] = useState(false);
@@ -52,39 +53,61 @@ const RegistrationScreen = () => {
   const [login, setLogin] = useState("");
   const [email, setEmail] = useState("");
 
-  const handleFocus = (currentFocusInput = '') => {
+  const handleFocus = (currentFocusInput = "") => {
     setIsShowKeyboard(true);
-     setCurrentFocused(currentFocusInput);
+    setCurrentFocused(currentFocusInput);
   };
   const clearUserForm = () => {
     setLogin("");
     setEmail("");
     setPassword("");
   };
-  const onSubmitUserRegister = () => {
-    if (!login || !email || !password)
-      return console.warn("Будь-ласка, заповніть поля");
 
-    console.log({ login, email, password, avatar });
+  const handleRegistration = async () => {
+    try {
+      if (!login || !email || !password) {
+        console.warn("Будь-ласка, заповніть поля");
+        return;
+      }
 
-    handleKeyboardHide();
-    navigation.navigate('Home', { user: { login, email, password } });
-    clearUserForm();
+      await createUserWithEmailAndPassword(auth, email, password);
+
+      const user = auth.currentUser;
+      if (user) {
+        await updateProfile(user, { displayName: login });
+        console.log("Користувач успішно зареєстрований!");
+
+        handleKeyboardHide();
+        navigation.navigate("Home", { user: { login, email, password } });
+        clearUserForm();
+      }
+    } catch (error) {
+      console.error("Помилка реєстрації:", error);
+    }
   };
-  const onLoadAvatar = async () => {
+
+const onLoadAvatar = async () => {
+  try {
     const avatarImg = await DocumentPicker.getDocumentAsync({
       type: "image/*",
     });
 
     if (avatarImg.type === "cancel") return setAvatar(null);
     setAvatar(avatarImg);
-  };
+  } catch (error) {
+    console.error("Помилка завантаження аватара:", error);
+  }
+};
 
-  const handleKeyboardHide = () => {
+const handleKeyboardHide = () => {
+  try {
     setIsShowKeyboard(false);
     setCurrentFocused("");
     Keyboard.dismiss();
-  };
+  } catch (error) {
+    console.error("Помилка при згортанні клавіатури:", error);
+  }
+};
 
   return (
     <TouchableWithoutFeedback onPress={handleKeyboardHide}>
@@ -162,10 +185,13 @@ const RegistrationScreen = () => {
 
             {!isShowKeyboard && (
               <View>
-                <TouchableOpacity style={btn} onPress={onSubmitUserRegister}>
+                <TouchableOpacity style={btn} onPress={handleRegistration}>
                   <Text style={btnText}>Зареєструватися</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={link} onPress={() => navigation.navigate('Login')}>
+                <TouchableOpacity
+                  style={link}
+                  onPress={() => navigation.navigate("Login")}
+                >
                   <Text style={linkText}>
                     Вже є акаунт?
                     <Text style={linkTextUnderline}>Увійти</Text>

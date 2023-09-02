@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { auth } from "../../firebaseConfig";
 
 import PostsItem from "../components/PostsItem/PostsItem";
 
@@ -38,12 +39,16 @@ const PostsScreen = ({ route }) => {
       postName: "hi",
     },
   ]);
+  const [displayName, setDisplayName] = useState("Oleksandr Lysenko");
+  const [displayMail, setDisplayMail] = useState("email@example.com");
 
-
-
-
-
-
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user) {
+      setDisplayName(user.displayName || "Oleksandr Lysenko");
+      setDisplayMail(user.email || "email@example.com");
+    }
+  }, []);
 
   useEffect(() => {
     if (route.params?.newPost) {
@@ -56,8 +61,8 @@ const PostsScreen = ({ route }) => {
       <View style={styles.avatarWrapper}>
         <Image style={styles.avatarImg} />
         <View>
-          <Text style={styles.avatarName}>Oleksandr Lysenko</Text>
-          <Text style={styles.avatarEmail}>email@example.com</Text>
+          <Text style={styles.avatarName}>{displayName}</Text>
+          <Text style={styles.avatarEmail}>{displayMail}</Text>
         </View>
       </View>
       <FlatList

@@ -8,6 +8,9 @@ import { Animated } from "react-native";
 import { TouchableOpacity, FlatList } from "react-native";
 import CirclePlus from "../../assets/svg/CirclePlus";
 import { useState } from "react";
+import { auth } from "../../firebaseConfig";
+import { useDispatch, useSelector } from "react-redux";
+import { authSignOut } from "../../redux/authReducer"; 
 import {
   container,
   bgContainer,
@@ -30,16 +33,53 @@ const ProfileScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const [isAvatar, setAvatar] = useState(null);
+  const [displayName, setDisplayName] = useState("Oleksandr Lysenko");
+    const dispatch = useDispatch();
+ const user = useSelector((state) => {
+  console.log(state); 
+  return state.auth.user;
+});
 
+  useEffect(() => {
+    console.log("Компонент ProfileScreen монтируется...");
+    const user = auth.currentUser;
+    if (user) {
+      setDisplayName(user.displayName || "Oleksandr Lysenko");
+    }
+  }, []);
   const onLoadAvatar = async () => {
     console.log("onLoadAvatar called");
     const avatarImg = await DocumentPicker.getDocumentAsync({
       type: "image/*",
     });
     console.log("Avatar image:", avatarImg);
+
     if (avatarImg.type === "cancel") return setAvatar(null);
+
     setAvatar(avatarImg);
+
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        await updateProfile(user, {
+          displayName: user.displayName || "defaultDisplayName",
+        });
+        console.log("Профіль успушно оновлений!");
+      } catch (error) {
+        console.error("Помилка оновлення:", error);
+      }
+    }
   };
+
+   const handleLogout = async () => {
+  try {
+    await dispatch(authSignOut());
+    navigation.navigate("Login");
+    console.log("Выход из системы выполнен успешно.");
+  } catch (error) {
+    console.error("Error logging out:", error);
+  }
+};
 
   const [posts, setPosts] = useState([
     {
@@ -97,10 +137,10 @@ const ProfileScreen = () => {
               />
               <TouchableOpacity
                 activeOpacity={0.7}
-                onPress={() => navigation.navigate("Login")}
+                
                 style={{ logOut, marginLeft: 190, marginTop: -24 }}
               >
-                <LogOut />
+                <LogOut onPress={handleLogout}/>
               </TouchableOpacity>
             </TouchableOpacity>
           </View>
@@ -111,7 +151,7 @@ const ProfileScreen = () => {
               marginTop: 92,
             }}
           >
-            Oleksandr Lysenko
+            {displayName}
           </Text>
 
           <FlatList

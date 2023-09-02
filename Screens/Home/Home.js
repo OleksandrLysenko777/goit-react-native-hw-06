@@ -11,12 +11,25 @@ import LogOut from "../../assets/svg/LogOut";
 import CirclePlus from "../../assets/svg/CirclePlus";
 import Grid from "../../assets/svg/Grid";
 import User from "../../assets/svg/User";
+import { auth } from "../../firebaseConfig";
+import { useNavigation } from "@react-navigation/native";
 
 const ButtomTabs = createBottomTabNavigator();
 const Home = (posts) => {
+   const navigation = useNavigation();
   const route = useRoute();
   const { params } = route;
   const initialPosts = params?.userPosts || [];
+
+ const handleLogout = async () => {
+    try {
+      await auth.signOut(); 
+      navigation.navigate("Login"); 
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   return (
     <ButtomTabs.Navigator
       screenOptions={() => ({
@@ -41,7 +54,7 @@ const Home = (posts) => {
           ...postsOptions,
           headerRight: () => (
             <LogOut
-              onPress={() => navigation.navigate("Login")}
+              onPress={handleLogout}
               title="Return back"
               color="#fff"
               style={styles.logOut}
