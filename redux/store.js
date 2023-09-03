@@ -2,11 +2,13 @@ import { configureStore } from '@reduxjs/toolkit';
 import { combineReducers } from 'redux';
 
 import authReducer from './authReducer'; 
-import postReducer from "./Post/postSlice";
+import postSlice from "./Post/postSlice";
+import commentsSlice from './Comments/commentsReducer';
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  posts: postReducer,
+  posts: postSlice,
+  comments: commentsSlice,
 });
 
 const store = configureStore({

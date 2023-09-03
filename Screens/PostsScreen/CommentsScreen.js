@@ -48,26 +48,7 @@ const CommentsScreen = ({ route }) => {
   const isFocused = useIsFocused();
   const [commentText, setCommentText] = useState("");
   const [commentedPosts, setCommentedPosts] = useState([]);
-  const [comments, setComments] = useState([
-    {
-      authorAvatar: "",
-      comment: "Comment 1sknnn",
-      date: "09 червня, 2020 | 08:40",
-      isAuthor: false,
-    },
-    {
-      otherAvatar: "",
-      comment: "Comment 2sknnn",
-      date: "09 червня, 2020 | 08:40",
-      isAuthor: true,
-    },
-    {
-      authorAvatar: "",
-      comment: "Comment 3sknnn",
-      date: "09 червня, 2020 | 08:40",
-      isAuthor: true,
-    },
-  ]);
+  const [comments, setComments] = useState([ ]);
 
   useEffect(() => {
     if (isFocused) {
@@ -100,6 +81,7 @@ const CommentsScreen = ({ route }) => {
         tabBarStyle: { display: "none" },
         headerShown: true,
       });
+      
       const loadComments = async () => {
         try {
           const storedComments = await AsyncStorage.getItem(

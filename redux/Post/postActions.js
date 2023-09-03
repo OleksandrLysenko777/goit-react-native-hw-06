@@ -1,19 +1,14 @@
 import { addPost, setPosts } from "./postSlice";
 import { firestore } from "../../firebaseConfig"; 
 
-export const fetchPosts = () => async (dispatch) => {
+export const fetchPosts = (postData) => async (dispatch) => {
   try {
     const postsRef = firestore.collection("posts");
-    const snapshot = await postsRef.get();
-    const posts = [];
-
-    snapshot.forEach((doc) => {
-      posts.push(doc.data());
-    });
-
-    dispatch(setPosts(posts));
+    await postsRef.add(postData);
+    
+    dispatch(addPost(postData));
   } catch (error) {
-    console.error("Error fetching posts:", error);
+    console.error("Error creating posts:", error);
   }
 };
 
